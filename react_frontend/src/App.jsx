@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const API_URL = "http://127.0.0.1:5000/tasks";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks, setTasks] = useState([]); // State variable to store tasks
+  const [newTask, setNewTask] = useState("");
+
+  // Fetch tasks from API
+  const fetchTasks = async () => {
+    const response = await axios.get(API_URL);
+    setTasks(response.data);
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  // Add a new task
+  const addTask = async () => {
+    if (newTask.trim() === "") return;
+    await axios.post(API_URL, { title: newTask });
+    setNewTask("");
+    fetchTasks();
+  };
+
+  // Toggle task completion
+  const toggleTask = async (id) => {
+    await axios.put(`${API_URL}/${id}`);
+    fetchTasks();
+  };
+
+  // Delete a task
+  const deleteTask = async (id) => {
+    await axios.delete(`${API_URL}/${id}`);
+    fetchTasks();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      <h1>Task Manager</h1>
+      <input
+        type="text"
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        placeholder="Enter a new task..."
+      />
+      <button onClick={addTask}>Add Task</button>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task.id}>
+            <span
+              className={task.completed ? "completed" : ""}
+              onClick={() => toggleTask(task.id)}
+            >
+              {task.title}
+            </span>
+            <button onClick={() => deleteTask(task.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
-export default App
+export default App;
