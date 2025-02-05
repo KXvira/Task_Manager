@@ -57,7 +57,7 @@ function App() {
             >
               {task.title}
             </span>
-            <button onClick={() => deleteTask(task.id)}>❌</button>
+            <button onClick={() => deleteTask(task.id)}>DELETE</button>
           </li>
         ))}
       </ul>
